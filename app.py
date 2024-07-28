@@ -1,10 +1,13 @@
-from flask import Flask, request, render_template
+from flask import Flask, request, render_template, send_from_directory
 import yfinance as yf
 import matplotlib.pyplot as plt
-import io
-import base64
+import os
 
 app = Flask(__name__)
+
+# Ensure the static directory exists
+if not os.path.exists('static'):
+    os.makedirs('static')
 
 @app.route('/')
 def home():
@@ -22,7 +25,8 @@ def get_stock():
         if hist.empty:
             return "No data found for the given ticker and date range."
 
-        img = io.BytesIO()
+        # Save plot to a file
+        plot_filename = f'static/{ticker}.png'
         plt.figure(figsize=(10, 6))
         plt.plot(hist.index, hist['Close'], label=ticker)
         plt.title(f"{ticker} Stock Price")
@@ -30,17 +34,20 @@ def get_stock():
         plt.ylabel("Price")
         plt.legend()
         plt.grid(True)
-        plt.savefig(img, format='png')
-        img.seek(0)
-        plot_url = base64.b64encode(img.getvalue()).decode()
-        
+        plt.savefig(plot_filename)
+        plt.close()
+
         initial_price = hist['Close'].iloc[0]
         final_price = hist['Close'].iloc[-1]
         percentage_change = ((final_price - initial_price) / initial_price) * 100
         
-        return render_template('result.html', plot_url=plot_url, ticker=ticker, percentage_change=percentage_change)
+        return render_template('result.html', plot_url=plot_filename, ticker=ticker, percentage_change=percentage_change)
     except Exception as e:
         return f"An error occurred: {e}"
+
+@app.route('/static/<path:filename>')
+def static_files(filename):
+    return send_from_directory('static', filename)
 
 if __name__ == '__main__':
     app.run(debug=True)
