@@ -2,6 +2,7 @@ from flask import Flask, request, render_template, send_from_directory
 import yfinance as yf
 import matplotlib.pyplot as plt
 import os
+import numpy as np
 
 app = Flask(__name__)
 
@@ -37,8 +38,8 @@ def get_stock():
         plt.savefig(plot_filename)
         plt.close()
 
-        initial_price = hist['Close'].iloc[0]
-        final_price = hist['Close'].iloc[-1]
+        initial_price = np.array(hist['Close'])[0]
+        final_price = np.array(hist['Close'])[-1]
         percentage_change = ((final_price - initial_price) / initial_price) * 100
         
         return render_template('result.html', plot_url=plot_filename, ticker=ticker, percentage_change=percentage_change)
