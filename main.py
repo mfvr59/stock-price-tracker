@@ -4,21 +4,14 @@ from datetime import datetime
 
 def get_stock_prices(tickers):
     for ticker in tickers:
-        try:
-            stock = yf.Ticker(ticker)
-            price = stock.history(period="1d")['Close'].iloc[0]
-            print(f"The current price of {ticker} is ${price:.2f}")
-        except Exception as e:
-            print(f"Could not retrieve data for {ticker}: {e}")
+        stock = yf.Ticker(ticker)
+        price = stock.history(period="1d")['Close'].iloc[0]
+        print(f"The current price of {ticker} is ${price:.2f}")
 
 def get_historical_data(ticker, start_date, end_date):
-    try:
-        stock = yf.Ticker(ticker)
-        hist = stock.history(start=start_date, end=end_date)
-        return hist
-    except Exception as e:
-        print(f"Could not retrieve historical data for {ticker}: {e}")
-        return None
+    stock = yf.Ticker(ticker)
+    hist = stock.history(start=start_date, end=end_date)
+    return hist
 
 def plot_stock_data(ticker, hist):
     if hist is not None:
@@ -56,3 +49,4 @@ if __name__ == "__main__":
             percentage_change = calculate_percentage_change(hist_data)
             if percentage_change is not None:
                 print(f"The percentage change in price for {ticker} from {start_date} to {end_date} is {percentage_change:.2f}%")
+
